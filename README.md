@@ -2,15 +2,18 @@
 
 A multi-user CLI application needs to persist two pieces of state between runs: which database to connect to, and who is currently logged in. Rather than hardcoding these values or passing them as flags every time, the app reads and writes a JSON config file stored in the user's home directory.
 
-Architecture
-~/.gatorconfig.json          # persisted state (outside the project)
+**Architecture**
 
+~/.gatorconfig.json — persisted state (outside the project)
+
+```
 project root/
 ├── go.mod                   # module definition
 ├── main.go                  # entry point, orchestrates the app
 └── internal/
     └── config/
         └── config.go        # config package: read/write JSON config
+```
 
 internal/ signals that the config package is private to this module — other external modules cannot import it.
 
