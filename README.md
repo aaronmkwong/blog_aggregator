@@ -9,10 +9,12 @@ A multi-user CLI application needs to persist two pieces of state between runs: 
 ```
 project root/
 ├── go.mod                   # module definition
-├── main.go                  # entry point, orchestrates the app
+├── main.go                  # entry point: reads config, initializes state, registers/runs commands
+├── commands.go              # command system: state, command structs, registry, run/register methods
+├── handler_user.go          # user-related command handlers, such as login
 └── internal/
     └── config/
-        └── config.go        # config package: read/write JSON config
+        └── config.go        # config package: read/write JSON config and update current user
 ```
 
 internal/ signals that the config package is private to this module — other external modules cannot import it.
@@ -20,6 +22,12 @@ internal/ signals that the config package is private to this module — other ex
 main.go depends on the config package but the config package has no knowledge of main. Dependencies flow one way.
 
 The JSON file on disk is the only persistence layer at this stage — no database yet.
+
+main.go           -> startup: read config, create state, register commands, parse os.Args
+
+commands.go       -> state, command, commands, run/register
+
+handler_user.go   -> handlerLogin and future user-related handlers
 
 **Coding Concepts**
 
