@@ -1,14 +1,22 @@
 package main
 
+// _ blank identifier precedes github.com/lib/p
+// because running this package's setup/initialization code, 
+// but not going to use its code directly, so ignore unused import rule
 import (
+	"database/sql"
 	"fmt"
 	"os"
+	"log"
 
 	"github.com/aaronmkwong/blog_aggregator/internal/config"
+	"github.com/aaronmkwong/blog_aggregator/internal/database"
+	_ "github.com/lib/pq"
 )
 
-// Holds shared application state
+// Holds shared application and database states
 type state struct {
+	db  *database.Queries
 	cfg *config.Config
 }
 
@@ -32,8 +40,19 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Open the connection
+    db, err := sql.Open("postgres", cfg.DBURL) // using the dbURL from your config
+    if err != nil {
+        log.Fatalf("error connecting to database: %v", err)
+    }
+    defer db.Close() // It's good practice to close the db connection when main exits
+
+    // Create SQLC queries instance
+    dbQueries := database.New(db)
+
 	// Initialize app state
 	s := &state{
+		db:  dbQueries,
 		cfg: &cfg,
 	}
 
@@ -44,6 +63,9 @@ func main() {
 
 	// Register login handler
 	cmds.register("login", handlerLogin)
+
+	// Register register handler
+	cmds.register("register", handlerRegister)
 
 	// Require command-line input
 	if len(os.Args) < 2 {
