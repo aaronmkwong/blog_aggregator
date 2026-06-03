@@ -11,13 +11,14 @@ project root/
 ├── go.mod                   # module definition
 ├── main.go                  # entry point: reads config, initializes state, registers/runs commands
 ├── commands.go              # command system: state, command structs, registry, run/register methods
-├── handler_user.go          # user-related command handlers, such as login and register
+├── handler_user.go          # user-related command handlers: login, register
+├── handler_reset.go         # reset command handler: deletes all users (dev/testing utility)
 ├── sqlc.yaml                # SQLC config: maps schema/queries dirs to generated Go output
 ├── sql/
 │   ├── schema/
 │   │   └── 001_users.sql    # Goose migration: creates/drops the users table (up/down)
 │   └── queries/
-│       └── users.sql        # SQLC query definitions (CreateUser, GetUser, etc.)
+│       └── users.sql        # SQLC query definitions (CreateUser, GetUser, DeleteUsers)
 └── internal/
     ├── config/
     │   └── config.go        # config package: read/write JSON config and update current user
@@ -31,19 +32,24 @@ internal/ signals that both config and database packages are private to this mod
 
 main.go depends on both config and database packages; neither has knowledge of main. Dependencies flow one way.
 
-The PostgreSQL database is now the persistence layer for users. The JSON file persists the currently logged-in username.
+The PostgreSQL database is the persistence layer for users. The JSON file persists the currently logged-in username.
 
-main.go           -> startup: read config, open DB connection, create state, register commands, parse os.Args
+main.go           -> startup: read config, open DB connection, create state,
+                     register commands (login, register, reset), parse os.Args
 
 commands.go       -> state, command, commands, run/register
 
 handler_user.go   -> handlerLogin, handlerRegister, and future user-related handlers
 
+handler_reset.go  -> handlerReset: calls DeleteUsers query, dev/test utility only
+
 sql/schema/       -> Goose migrations (schema management)
 
 sql/queries/      -> SQLC query definitions (raw SQL)
+                     :one  — returns a single row (CreateUser, GetUser)
+                     :exec — executes with no return (DeleteUsers)
 
-internal/database -> SQLC-generated type-safe Go code (do not edit)
+internal/database -> SQLC-generated type-safe Go code (not for editing)
 
 **Coding Concepts**
 
