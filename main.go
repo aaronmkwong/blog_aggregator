@@ -67,6 +67,9 @@ func main() {
 	// Register register handler
 	cmds.register("register", handlerRegister)
 
+	// Register register handler
+	cmds.register("reset", handlerReset)
+
 	// Require command-line input
 	if len(os.Args) < 2 {
 		fmt.Println("not enough arguments provided")

@@ -1,3 +1,5 @@
+// Defines the command and commands types, plus register and run methods
+
 package main
 
 import "fmt"
