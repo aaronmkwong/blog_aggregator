@@ -73,6 +73,9 @@ func main() {
 	// Register users handler
 	cmds.register("users", handlerUsers)
 
+	// Register agg handler
+	cmds.register("agg", handlerAgg)	
+
 	// Require command-line input
 	if len(os.Args) < 2 {
 		fmt.Println("not enough arguments provided")

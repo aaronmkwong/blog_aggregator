@@ -1,6 +1,20 @@
-**Use Case**
+**Summary**
 
 A multi-user CLI application needs to persist two pieces of state between runs: which database to connect to, and who is currently logged in. Rather than hardcoding these values or passing them as flags every time, the app reads and writes a JSON config file stored in the user's home directory.
+
+**Coding Concepts**
+
+Packages and visibility — exported identifiers (Config, Read, SetUser) are usable by main; unexported helpers (write, getConfigFilePath) are internal to the package.
+
+Struct tags — json:"db_url" maps Go field names to JSON key names during marshalling and unmarshalling.
+
+JSON encoding — json.Unmarshal deserializes JSON bytes into a Go struct; json.MarshalIndent serializes a struct back to formatted JSON bytes.
+
+Methods vs functions — SetUser is a method on *Config (pointer receiver) so it can mutate the struct in place before writing to disk.
+
+Error handling — Go's explicit error return pattern is used throughout, propagating errors up to main where they are logged and the program exits.
+
+OS interaction — os.UserHomeDir, os.ReadFile, and os.WriteFile handle filesystem access in a cross-platform way.
 
 **Architecture**
 
@@ -14,6 +28,8 @@ project root/
 ├── handler_user.go          # user-related command handlers: login, register
 ├── handler_users.go         # users command handler: lists users and marks the current user
 ├── handler_reset.go         # reset command handler: deletes all users (dev/testing utility)
+├── handler_agg.go           # agg command handler: fetches and prints a single RSS feed
+├── rss_feed.go              # RSS types (RSSFeed, RSSItem) and fetchFeed function
 ├── sqlc.yaml                # SQLC config: maps schema/queries dirs to generated Go output
 ├── sql/
 │   ├── schema/
@@ -36,7 +52,7 @@ main.go depends on both config and database packages; neither has knowledge of m
 The PostgreSQL database is the persistence layer for users. The JSON file persists the currently logged-in username.
 
 main.go            -> startup: read config, open DB connection, create state,
-                      register commands (login, register, reset, users), parse os.Args
+                      register commands (login, register, reset, users, agg), parse os.Args
 
 commands.go        -> command, commands, run/register
 
@@ -47,6 +63,14 @@ handler_users.go   -> handlerUsers: calls GetUsers, prints each username,
 
 handler_reset.go   -> handlerReset: calls DeleteUsers query, dev/test utility only
 
+handler_agg.go     -> handlerAgg: calls fetchFeed with a hardcoded URL,
+                      prints the resulting RSSFeed struct to the console
+
+rss_feed.go        -> RSSFeed, RSSItem structs with xml tags
+                      fetchFeed: creates HTTP request with context and User-Agent header,
+                      executes request, reads body, unmarshals XML, unescapes HTML entities
+                      in channel and item Title/Description fields
+
 sql/schema/        -> Goose migrations (schema management)
 
 sql/queries/       -> SQLC query definitions (raw SQL)
@@ -56,16 +80,3 @@ sql/queries/       -> SQLC query definitions (raw SQL)
 
 internal/database  -> SQLC-generated type-safe Go code (not for editing)
 
-**Coding Concepts**
-
-Packages and visibility — exported identifiers (Config, Read, SetUser) are usable by main; unexported helpers (write, getConfigFilePath) are internal to the package.
-
-Struct tags — json:"db_url" maps Go field names to JSON key names during marshalling and unmarshalling.
-
-JSON encoding — json.Unmarshal deserializes JSON bytes into a Go struct; json.MarshalIndent serializes a struct back to formatted JSON bytes.
-
-Methods vs functions — SetUser is a method on *Config (pointer receiver) so it can mutate the struct in place before writing to disk.
-
-Error handling — Go's explicit error return pattern is used throughout, propagating errors up to main where they are logged and the program exits.
-
-OS interaction — os.UserHomeDir, os.ReadFile, and os.WriteFile handle filesystem access in a cross-platform way.
