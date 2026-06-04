@@ -10,15 +10,16 @@ A multi-user CLI application needs to persist two pieces of state between runs: 
 project root/
 ├── go.mod                   # module definition
 ├── main.go                  # entry point: reads config, initializes state, registers/runs commands
-├── commands.go              # command system: state, command structs, registry, run/register methods
+├── commands.go              # command system: command structs, registry, run/register methods
 ├── handler_user.go          # user-related command handlers: login, register
+├── handler_users.go         # users command handler: lists users and marks the current user
 ├── handler_reset.go         # reset command handler: deletes all users (dev/testing utility)
 ├── sqlc.yaml                # SQLC config: maps schema/queries dirs to generated Go output
 ├── sql/
 │   ├── schema/
 │   │   └── 001_users.sql    # Goose migration: creates/drops the users table (up/down)
 │   └── queries/
-│       └── users.sql        # SQLC query definitions (CreateUser, GetUser, DeleteUsers)
+│       └── users.sql        # SQLC query definitions (CreateUser, GetUser, GetUsers, DeleteUsers)
 └── internal/
     ├── config/
     │   └── config.go        # config package: read/write JSON config and update current user
@@ -34,22 +35,26 @@ main.go depends on both config and database packages; neither has knowledge of m
 
 The PostgreSQL database is the persistence layer for users. The JSON file persists the currently logged-in username.
 
-main.go           -> startup: read config, open DB connection, create state,
-                     register commands (login, register, reset), parse os.Args
+main.go            -> startup: read config, open DB connection, create state,
+                      register commands (login, register, reset, users), parse os.Args
 
-commands.go       -> state, command, commands, run/register
+commands.go        -> command, commands, run/register
 
-handler_user.go   -> handlerLogin, handlerRegister, and future user-related handlers
+handler_user.go    -> handlerLogin, handlerRegister
 
-handler_reset.go  -> handlerReset: calls DeleteUsers query, dev/test utility only
+handler_users.go   -> handlerUsers: calls GetUsers, prints each username,
+                      and marks the currently logged-in user
 
-sql/schema/       -> Goose migrations (schema management)
+handler_reset.go   -> handlerReset: calls DeleteUsers query, dev/test utility only
 
-sql/queries/      -> SQLC query definitions (raw SQL)
-                     :one  — returns a single row (CreateUser, GetUser)
-                     :exec — executes with no return (DeleteUsers)
+sql/schema/        -> Goose migrations (schema management)
 
-internal/database -> SQLC-generated type-safe Go code (not for editing)
+sql/queries/       -> SQLC query definitions (raw SQL)
+                      :one  — returns a single row (CreateUser, GetUser)
+                      :many — returns multiple rows (GetUsers)
+                      :exec — executes with no returned rows (DeleteUsers)
+
+internal/database  -> SQLC-generated type-safe Go code (not for editing)
 
 **Coding Concepts**
 
