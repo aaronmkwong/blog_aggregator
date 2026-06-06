@@ -82,6 +82,12 @@ func main() {
 	// Register feed handler
 	cmds.register("feeds", handlerFeed)
 
+	// Register follow handler
+	cmds.register("follow", handlerFollow)
+
+	// Register following handler
+	cmds.register("following", handlerFollowing)
+
 	// Require command-line input
 	if len(os.Args) < 2 {
 		fmt.Println("not enough arguments provided")
