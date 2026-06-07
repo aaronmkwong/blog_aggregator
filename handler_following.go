@@ -3,19 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+
+	"github.com/aaronmkwong/blog_aggregator/internal/database"
 )
 
 // Handles the following command
-func handlerFollowing(s *state, cmd command) error {
-
-	// Get the current user
-	user, err := s.db.GetUser(
-		context.Background(),
-		s.cfg.CurrentUserName,
-	)
-	if err != nil {
-		return err
-	}
+func handlerFollowing(s *state, cmd command, user database.User) error {
 
 	// Get all feed follows for the current user
 	follows, err := s.db.GetFeedFollowsForUser(

@@ -10,7 +10,7 @@ import (
 )
 
 // Handles the addfeed command
-func handlerAddFeed(s *state, cmd command) error {
+func handlerAddFeed(s *state, cmd command, user database.User) error {
 
 	// Ensure name and URL were provided
 	if len(cmd.args) < 2 {
@@ -22,15 +22,6 @@ func handlerAddFeed(s *state, cmd command) error {
 
 	// Get feed URL from args
 	url := cmd.args[1]
-
-	// Get the current user from the database
-	user, err := s.db.GetUser(
-		context.Background(),
-		s.cfg.CurrentUserName,
-	)
-	if err != nil {
-		return err
-	}
 
 	// Store current UTC timestamp
 	now := time.Now().UTC()

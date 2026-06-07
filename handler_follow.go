@@ -10,7 +10,7 @@ import (
 )
 
 // Handles the follow command
-func handlerFollow(s *state, cmd command) error {
+func handlerFollow(s *state, cmd command, user database.User) error {
 
 	// Ensure a feed URL was provided
 	if len(cmd.args) < 1 {
@@ -20,14 +20,6 @@ func handlerFollow(s *state, cmd command) error {
 	// Get feed URL from args
 	url := cmd.args[0]
 
-	// Get the current user
-	user, err := s.db.GetUser(
-		context.Background(),
-		s.cfg.CurrentUserName,
-	)
-	if err != nil {
-		return err
-	}
 
 	// Look up the feed by URL
 	feed, err := s.db.GetFeedByURL(

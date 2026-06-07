@@ -77,16 +77,16 @@ func main() {
 	cmds.register("agg", handlerAgg)	
 
 	// Register add feed handler
-	cmds.register("addfeed", handlerAddFeed)
+	cmds.register("addfeed", middlewareLoggedIn(handlerAddFeed))
 
 	// Register feed handler
 	cmds.register("feeds", handlerFeed)
 
 	// Register follow handler
-	cmds.register("follow", handlerFollow)
+	cmds.register("follow", middlewareLoggedIn(handlerFollow))
 
 	// Register following handler
-	cmds.register("following", handlerFollowing)
+	cmds.register("following", middlewareLoggedIn(handlerFollowing))
 
 	// Require command-line input
 	if len(os.Args) < 2 {

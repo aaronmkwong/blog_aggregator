@@ -25,6 +25,7 @@ project root/
 ├── go.mod                             # module definition
 ├── go.sum                             # dependency checksums
 ├── main.go                            # entry point: reads config, initializes state, registers/runs commands
+├── middleware.go                      # enables handlers function signatures requiring logged in user to accept user as an argument 
 ├── commands.go                        # command system: command structs, registry, run/register methods
 ├── handler_user.go                    # user-related command handlers: login, register
 ├── handler_users.go                   # users command handler: lists users and marks the current user
@@ -72,6 +73,10 @@ The PostgreSQL database is the persistence layer for users. The JSON file persis
 main.go                          -> startup: read config, open DB connection, create state,
                                     register commands (login, register, reset, users, agg,
                                     addfeed, follow, following), parse os.Args
+
+middleware.go                    -> middleware: wrap handlers that require a logged-in user
+                                    by fetching the current user from the DB before
+                                    delegating to the handler
 
 commands.go                      -> command, commands, run/register
 
