@@ -35,6 +35,7 @@ project root/
 ├── handler_feed.go                    # feed command handler: prints all feeds in the database
 ├── handler_follow.go                  # follow command handler: creates a feed follow for the current user
 ├── handler_following.go               # following command handler: prints all feeds the current user follows
+├── handler_unfollow.go                # unfollow command handler: unfollows for the current user
 ├── rss_feed.go                        # RSS types (RSSFeed, RSSItem) and fetchFeed function
 ├── sqlc.yaml                          # SQLC config: maps schema/queries dirs to generated Go output
 ├── README.md                          # project documentation
@@ -50,6 +51,7 @@ project root/
 │       ├── feeds.sql                  # SQLC query: CreateFeed, GetFeeds, GetFeedByURL
 │       ├── feed_follow.sql            # SQLC query: CreateFeedFollow
 │       └── get_feed_follows_user.sql  # SQLC query: GetFeedFollowsForUser
+│       └── feed_unfollow.sql          # SQLC query: UnfollowFeed
 └── internal/
     ├── config/
     │   └── config.go                  # config package: read/write JSON config and update current user
@@ -62,6 +64,7 @@ project root/
         ├── feeds.sql.go               # generated from feeds.sql (CreateFeed, GetFeeds, GetFeedByURL)
         ├── feed_follow.sql.go         # generated from feed_follow.sql (CreateFeedFollow)
         └── get_feed_follows_user.sql.go  # generated from get_feed_follows_user.sql (GetFeedFollowsForUser)
+        └── feed_unfollow.sql.go       # generated from feed_unfollow.sql (UnfolowFeed)
 ```
 
 internal/ signals that both config and database packages are private to this module.
@@ -101,6 +104,10 @@ handler_feed.go                  -> handlerFeed: retrieves all feeds from the da
 handler_follow.go                -> handlerFollow: checks arguments, gets the current user,
                                     looks up the feed by URL, creates a feed follow record,
                                     and prints the user and feed name
+
+handler_unfollow.go              -> handlerUnfollow: checks arguments, gets the current user, 
+                                    looks up the feed by URL, deletes the matching feed follow record 
+                                    for that user and feed, and prints a confirmation message                                    
 
 handler_following.go             -> handlerFollowing: gets the current user, retrieves all
                                     feed follows for that user, and prints each feed name

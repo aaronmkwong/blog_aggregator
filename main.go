@@ -88,6 +88,9 @@ func main() {
 	// Register following handler
 	cmds.register("following", middlewareLoggedIn(handlerFollowing))
 
+	// Register unfollow handler
+	cmds.register("unfollow", middlewareLoggedIn(handlerUnfollow))
+
 	// Require command-line input
 	if len(os.Args) < 2 {
 		fmt.Println("not enough arguments provided")
