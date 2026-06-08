@@ -4,15 +4,15 @@ A multi-user CLI application needs to persist two pieces of state between runs: 
 
 Add Feeds
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="1000" height="1000">
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="750" height="750">
 
 Run Aggregator
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="1000" height="1000">
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="750" height="750">
 
 Confirm Database 
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_03.jpg" width="1000" height="1000">
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_03.jpg" width="500" height="500">
 
 **Coding Concepts**
 
