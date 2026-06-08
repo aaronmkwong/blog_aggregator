@@ -2,6 +2,18 @@
 
 A multi-user CLI application needs to persist two pieces of state between runs: which database to connect to, and who is currently logged in. Rather than hardcoding these values or passing them as flags every time, the app reads and writes a JSON config file stored in the user's home directory.
 
+Add Feeds
+
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="1000" height="1000">
+
+Run Aggregator
+
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="1000" height="1000">
+
+Confirm Database 
+
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_03.jpg" width="1000" height="1000">
+
 **Coding Concepts**
 
 Packages and visibility — exported identifiers (Config, Read, SetUser) are usable by main; unexported helpers (write, getConfigFilePath) are internal to the package.
@@ -30,7 +42,7 @@ project root/
 ├── handler_user.go                    # user-related command handlers: login, register
 ├── handler_users.go                   # users command handler: lists users and marks the current user
 ├── handler_reset.go                   # reset command handler: deletes all users (dev/testing utility)
-├── handler_agg.go                     # agg command handler: fetches and prints a single RSS feed
+├── handler_agg.go                     # agg command handler: fetches and prints RSS feed
 ├── handler_addfeed.go                 # addfeed command handler: creates a feed and auto-follows it
 ├── handler_feed.go                    # feed command handler: prints all feeds in the database
 ├── handler_follow.go                  # follow command handler: creates a feed follow for the current user
@@ -44,6 +56,7 @@ project root/
 │   │   ├── 001_users.sql              # Goose migration: creates/drops the users table (up/down)
 │   │   ├── 002_feeds.sql              # Goose migration: creates/drops the feeds table (up/down) with ON DELETE CASCADE
 │   │   └── 003_feed_follows.sql       # Goose migration: creates/drops the feed_follows table (up/down) with ON DELETE CASCADE
+│   │   └── 004_feed_lastfetched.sql   # Goose migration: adds the last_fetched_at column to the feeds table to track when a feed was last scraped
 │   └── queries/
 │       ├── users.sql                  # SQLC query: CreateUser, GetUser
 │       ├── get_users.sql              # SQLC query: GetUsers
@@ -52,6 +65,8 @@ project root/
 │       ├── feed_follow.sql            # SQLC query: CreateFeedFollow
 │       └── get_feed_follows_user.sql  # SQLC query: GetFeedFollowsForUser
 │       └── feed_unfollow.sql          # SQLC query: UnfollowFeed
+│       └── feed_mark_fetched.sql      # SQLC query: MarkFeedFetched
+│       └── feed_next_fetch.sql        # SQLC query: GetNextFeedToFetch
 └── internal/
     ├── config/
     │   └── config.go                  # config package: read/write JSON config and update current user
@@ -65,6 +80,8 @@ project root/
         ├── feed_follow.sql.go         # generated from feed_follow.sql (CreateFeedFollow)
         └── get_feed_follows_user.sql.go  # generated from get_feed_follows_user.sql (GetFeedFollowsForUser)
         └── feed_unfollow.sql.go       # generated from feed_unfollow.sql (UnfolowFeed)
+        └── feed_markfetched.sql.go    # generated from feed_markfetched.sql (MarkFeedFetched)
+        └── feed_next_fetch.sql.go     # generated from feed_next_fetch.sql (GetNextFeedToFetch)
 ```
 
 internal/ signals that both config and database packages are private to this module.
