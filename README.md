@@ -8,7 +8,7 @@ Add Feeds
 
 Run Aggregator
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="600" height="600">
+<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_02.jpg" width="600" height="600">
 
 Confirm Database 
 
