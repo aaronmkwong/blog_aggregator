@@ -1,34 +1,135 @@
-**Summary**
+# Gator
 
-A multi-user CLI application needs to persist two pieces of state between runs: which database to connect to, and who is currently logged in. Rather than hardcoding these values or passing them as flags every time, the app reads and writes a JSON config file stored in the user's home directory.
+Gator is a CLI RSS feed aggregator written in Go. It lets users register accounts, follow RSS feeds, continuously collect posts into PostgreSQL, and browse recent content from the feeds they follow.
 
-Add Feeds
+## Requirements
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_01.jpg" width="600" height="600">
+Gator requires:
 
-Run Aggregator
+* Go
+* PostgreSQL
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_02.jpg" width="600" height="600">
+Installation instructions:
 
-Confirm Database 
+* Go: https://go.dev/doc/install
+* PostgreSQL: https://www.postgresql.org/download/
 
-<img src="https://github.com/aaronmkwong/blog_aggregator/blob/main/screenshots/Blog_Aggregator_03.jpg" width="250" height="250">
+## Install
 
-**Coding Concepts**
+Install the CLI with:
 
-Packages and visibility — exported identifiers (Config, Read, SetUser) are usable by main; unexported helpers (write, getConfigFilePath) are internal to the package.
+```bash
+go install github.com/aaronmkwong/blog_aggregator@latest
+```
 
-Struct tags — json:"db_url" maps Go field names to JSON key names during marshalling and unmarshalling.
+Replace the module path with your actual repository path.
 
-JSON encoding — json.Unmarshal deserializes JSON bytes into a Go struct; json.MarshalIndent serializes a struct back to formatted JSON bytes.
+## Configuration
 
-Methods vs functions — SetUser is a method on *Config (pointer receiver) so it can mutate the struct in place before writing to disk.
+Create a config file at:
 
-Error handling — Go's explicit error return pattern is used throughout, propagating errors up to main where they are logged and the program exits.
+```text
+~/.gatorconfig.json
+```
 
-OS interaction — os.UserHomeDir, os.ReadFile, and os.WriteFile handle filesystem access in a cross-platform way.
+Example:
 
-**Architecture**
+```json
+{
+  "db_url": "postgres://username:password@localhost:5432/gator?sslmode=disable",
+  "current_user_name": ""
+}
+```
+
+Replace the connection string with your PostgreSQL credentials.
+
+The database schema should be created using the project's SQL migrations before running the application.
+
+## Running Gator
+
+Example workflow:
+
+```bash
+gator register alice
+```
+
+```bash
+gator login alice
+```
+
+```bash
+gator addfeed "Hacker News" https://news.ycombinator.com/rss
+```
+
+```bash
+gator agg 1m
+```
+
+```bash
+gator browse 10
+```
+
+## Useful Commands
+
+### Users
+
+```bash
+gator register <username>
+```
+
+```bash
+gator login <username>
+```
+
+```bash
+gator users
+```
+
+### Feeds
+
+```bash
+gator addfeed "<feed_name>" <feed_url>
+```
+
+```bash
+gator feeds
+```
+
+```bash
+gator follow <feed_url>
+```
+
+```bash
+gator unfollow <feed_url>
+```
+
+```bash
+gator following
+```
+
+### Aggregation
+
+```bash
+gator agg <duration>
+```
+
+Example:
+
+```bash
+gator agg 30s
+```
+
+### Browse Posts
+
+```bash
+gator browse
+```
+
+```bash
+gator browse <limit>
+```
+
+## Architecture
 
 ~/.gatorconfig.json — persisted state (outside the project)
 
@@ -158,3 +259,14 @@ sql/queries/                     -> SQLC query definitions (raw SQL)
 
 internal/database                -> SQLC-generated type-safe Go code (not for editing): provides typed
                                     interfaces to interact with database records securely
+
+## Architecture<br>
+
+\*Add sorting and filtering options to the browse command<br>
+\*Add pagination to the browse command<br>
+\*Add concurrency to the agg command so that it can fetch more frequently<br>
+\*Add a search command that allows for fuzzy searching of posts<br>
+\*Add bookmarking or liking posts<br>
+\*Add a TUI that allows you to select a post in the terminal and view it in a more readable format (either in the terminal or open in a browser)<br>
+\*Add an HTTP API (and authentication/authorization) that allows other users to interact with the service remotely<br>
+\*Write a service manager that keeps the agg command running in the background and restarts it if it crashes<br>
