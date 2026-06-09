@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -6,7 +5,9 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
+	"strings"
 
+	"github.com/google/uuid"
 	"github.com/aaronmkwong/blog_aggregator/internal/database"
 )
 
@@ -81,12 +82,87 @@ func handlerAgg(s *state, cmd command) error {
 			continue
 		}
 
-		// Print post titles
+		// Save posts from feed
 		for _, item := range rssFeed.Channel.Item {
-			fmt.Printf(" - %s\n", item.Title)
+
+			// Initialize published_at as NULL
+			publishedAt := sql.NullTime{}
+
+			// Parse published time if present
+			if item.PubDate != "" {
+
+				parsedTime, err := parsePublishedTime(
+					item.PubDate,
+				)
+
+				// Store parsed time if successful
+				if err == nil {
+
+					publishedAt = sql.NullTime{
+						Time:  parsedTime,
+						Valid: true,
+					}
+
+				} else {
+
+					// Log parse error but continue saving post
+					fmt.Printf(
+						"Warning: unable to parse date '%s': %v\n",
+						item.PubDate,
+						err,
+					)
+				}
+			}
+
+			// Create post
+			_, err = s.db.CreatePost(
+				context.Background(),
+				database.CreatePostParams{
+					ID:          uuid.New(),
+					CreatedAt:   now,
+					UpdatedAt:   now,
+					Title:       item.Title,
+					Url:         item.Link,
+					Description: sql.NullString{
+						String: item.Description,
+						Valid:  item.Description != "",
+					},
+					PublishedAt: publishedAt,
+					FeedID:       feed.ID,
+				},
+			)
+
+			// Ignore duplicate URLs
+			if err != nil {
+
+				// Skip duplicate posts
+				if strings.Contains(
+					err.Error(),
+					"duplicate key value",
+				) {
+					continue
+				}
+
+				// Log other errors
+				fmt.Printf(
+					"Error creating post: %v\n",
+					err,
+				)
+			}
 		}
 	}
 
 	// Unreachable but required by compiler
 	return nil
+}
+
+func parsePublishedTime(pubDate string) (time.Time, error) {
+	// Try RFC1123Z first (e.g., "Mon, 02 Jan 2006 15:04:05 -0700")
+	t, err := time.Parse(time.RFC1123Z, pubDate)
+	if err == nil {
+		return t, nil
+	}
+
+	// Fallback to RFC1123 if needed (e.g., "Mon, 02 Jan 2006 15:04:05 MST")
+	return time.Parse(time.RFC1123, pubDate)
 }

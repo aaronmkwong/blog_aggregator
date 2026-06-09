@@ -43,6 +43,7 @@ project root/
 ├── handler_users.go                   # users command handler: lists users and marks the current user
 ├── handler_reset.go                   # reset command handler: deletes all users (dev/testing utility)
 ├── handler_agg.go                     # agg command handler: fetches and prints RSS feed
+├── handler_browse.go                  # ...
 ├── handler_addfeed.go                 # addfeed command handler: creates a feed and auto-follows it
 ├── handler_feed.go                    # feed command handler: prints all feeds in the database
 ├── handler_follow.go                  # follow command handler: creates a feed follow for the current user
@@ -57,6 +58,7 @@ project root/
 │   │   ├── 002_feeds.sql              # Goose migration: creates/drops the feeds table (up/down) with ON DELETE CASCADE
 │   │   └── 003_feed_follows.sql       # Goose migration: creates/drops the feed_follows table (up/down) with ON DELETE CASCADE
 │   │   └── 004_feed_lastfetched.sql   # Goose migration: adds the last_fetched_at column to the feeds table to track when a feed was last scraped
+│   │   └── 005_posts.sql              # Goose migration: creates/drops the posts table (up/down)
 │   └── queries/
 │       ├── users.sql                  # SQLC query: CreateUser, GetUser
 │       ├── get_users.sql              # SQLC query: GetUsers
@@ -67,6 +69,8 @@ project root/
 │       └── feed_unfollow.sql          # SQLC query: UnfollowFeed
 │       └── feed_mark_fetched.sql      # SQLC query: MarkFeedFetched
 │       └── feed_next_fetch.sql        # SQLC query: GetNextFeedToFetch
+│       └── get_posts.sql              # SQLC query: GetPostsForUser
+│       └── posts.sql                  # SQLC query: CreatePost
 └── internal/
     ├── config/
     │   └── config.go                  # config package: read/write JSON config and update current user
@@ -82,6 +86,8 @@ project root/
         └── feed_unfollow.sql.go       # generated from feed_unfollow.sql (UnfolowFeed)
         └── feed_markfetched.sql.go    # generated from feed_markfetched.sql (MarkFeedFetched)
         └── feed_next_fetch.sql.go     # generated from feed_next_fetch.sql (GetNextFeedToFetch)
+        └── get_posts.go               # generated from get_posts.sql (GetPostsForUser)
+        └── posts.sql.go               # generated from posts.sql (CreatePost)
 ```
 
 internal/ signals that both config and database packages are private to this module.
@@ -109,6 +115,10 @@ handler_reset.go                 -> handlerReset: calls DeleteUsers query, dev/t
 
 handler_agg.go                   -> handlerAgg: calls fetchFeed with a hardcoded URL,
                                     prints the resulting RSSFeed struct to the console
+
+handler_browse.go                -> handlerBrowse: retrieves the posts from feeds followed by the 
+                                    logged-in user up to an optional limit, and prints their details 
+                                    (title, URL, description) to the console
 
 handler_addfeed.go               -> handlerAddFeed: checks arguments, gets the current user,
                                     creates a new feed, auto-creates a feed follow record

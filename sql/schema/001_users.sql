@@ -1,5 +1,3 @@
--- This migration sets up our initial users table
-
 -- WARNING: Do NOT modify or remove the "goose Up" and "goose Down" directives below!
 -- Goose requires these exact comments to manage database migrations.
 
