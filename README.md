@@ -144,7 +144,7 @@ project root/
 ├── handler_users.go                   # users command handler: lists users and marks the current user
 ├── handler_reset.go                   # reset command handler: deletes all users (dev/testing utility)
 ├── handler_agg.go                     # agg command handler: fetches and prints RSS feed
-├── handler_browse.go                  # ...
+├── handler_browse.go                  # browse command handler: browses posts
 ├── handler_addfeed.go                 # addfeed command handler: creates a feed and auto-follows it
 ├── handler_feed.go                    # feed command handler: prints all feeds in the database
 ├── handler_follow.go                  # follow command handler: creates a feed follow for the current user
@@ -260,7 +260,7 @@ sql/queries/                     -> SQLC query definitions (raw SQL)
 internal/database                -> SQLC-generated type-safe Go code (not for editing): provides typed
                                     interfaces to interact with database records securely
 
-## Architecture<br>
+## Future Enhancements<br>
 
 \*Add sorting and filtering options to the browse command<br>
 \*Add pagination to the browse command<br>
